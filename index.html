@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Self-assembly of arc-shaped particles on a vesicle</title>
+<meta name="description" content="Monte Carlo simulations: arc-shaped particles on a free vesicle gather through the membrane, with no direct attraction between them.">
+<style>
+  :root { color-scheme: light; --ink: #1a1a1a; --muted: #5c6470; --accent: #014B96; --line: #d9dee5; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #fff; color: var(--ink); font: 17px/1.5 Arial, Helvetica, sans-serif; }
+  main { max-width: 900px; margin: 0 auto; padding: 24px 16px 40px; }
+  h1 { margin: 0 0 16px; font-size: clamp(22px, 5vw, 32px); line-height: 1.2; }
+  .choose { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 12px; }
+  .choose span { color: var(--muted); font-size: 15px; margin-right: 4px; }
+  button { min-width: 52px; min-height: 44px; padding: 0 12px; font: inherit; font-weight: bold; color: var(--accent); background: #fff; border: 2px solid var(--accent); border-radius: 6px; cursor: pointer; }
+  button[aria-pressed="true"] { color: #fff; background: var(--accent); }
+  button:focus-visible { outline: 3px solid #7fb0e6; outline-offset: 2px; }
+  video { display: block; width: 100%; max-height: 80vh; aspect-ratio: 4 / 3; background: #fff; border: 1px solid var(--line); border-radius: 6px; }
+  p { margin: 16px 0 0; }
+  sub { font-size: 0.75em; line-height: 0; }
+  .small { color: var(--muted); font-size: 15px; }
+  a { color: var(--accent); }
+</style>
+</head>
+<body>
+<main>
+  <h1>Self-assembly of arc-shaped particles on a vesicle</h1>
+  <div class="choose" id="choose" role="group" aria-label="Number of particles"><span>Particles:</span></div>
+  <video id="movie" controls autoplay muted loop playsinline preload="metadata"></video>
+  <p id="about"></p>
+  <p class="small" id="details"></p>
+  <p class="small">Fadel El Helweh and Amir H. Bahrami, UNAM, Bilkent University. Soft Matter Day 2026.<br>
+    The two-particle interaction: <a href="https://doi.org/10.1063/5.0350241"><i>J. Chem. Phys.</i> 165, 124703 (2026)</a>.</p>
+</main>
+<script>
+  // One entry per run. The page opens with the one marked first; a button starts another.
+  const MANY = "Arc-shaped particles start from a random arrangement on a free vesicle. There is no direct attraction between them, yet they gather through the membrane.";
+  const many_details = (steps) => "Monte Carlo simulation, area constraint only; <i>R</i><sub>p</sub>/<i>R</i><sub>v</sub> = 0.16, <i>θ</i><sub>p</sub> = 180°, <i>u</i> = 2. "
+    + "The movie covers " + steps + " × 10<sup>6</sup> steps after the particles are released. The view turns slowly; any other rotation is the vesicle's own.";
+  const RUNS = [
+    { n: 2, src: "movie_np002.mp4", poster: "start_np002.jpg",
+      about: "Two arc-shaped particles start apart on a vesicle and come together through the membrane, with no direct attraction between them.",
+      details: "Monte Carlo simulation, area constraint only; <i>R</i><sub>p</sub>/<i>R</i><sub>v</sub> = 0.26, <i>θ</i><sub>p</sub> = 120°. "
+        + "The movie covers 5 × 10<sup>6</sup> steps after the particles are released. The view turns slowly; any other rotation is the vesicle's own." },
+    { n: 20, src: "movie_np020.mp4", poster: "start_np020.jpg", steps: 15 },
+    { n: 30, src: "movie_np030.mp4", poster: "start_np030.jpg", steps: 4 },
+    { n: 40, src: "movie_np040.mp4", poster: "start_np040.jpg", steps: 4 },
+    { n: 50, src: "movie_np050.mp4", poster: "start_np050.jpg", steps: 3, first: true },
+    { n: 70, src: "movie_np070.mp4", poster: "start_np070.jpg", steps: 15 },
+  ];
+  const video = document.getElementById("movie");
+  const about = document.getElementById("about");
+  const details = document.getElementById("details");
+  const choose = document.getElementById("choose");
+
+  function show(run, button) {
+    choose.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", String(b === button)));
+    about.textContent = run.about || MANY;
+    details.innerHTML = run.details || many_details(run.steps);
+    video.poster = run.poster;
+    video.src = run.src;
+    video.play().catch(() => {});      // a phone in low-power mode may refuse; the play button is there
+  }
+
+  video.addEventListener("loadedmetadata", () => {
+    video.style.aspectRatio = video.videoWidth + " / " + video.videoHeight;
+  });
+
+  for (const run of RUNS) {
+    const b = document.createElement("button");
+    b.textContent = run.n;
+    b.setAttribute("aria-label", run.n + " particles");
+    b.addEventListener("click", () => show(run, b));
+    choose.append(b);
+    if (run.first) show(run, b);
+  }
+</script>
+</body>
+</html>
